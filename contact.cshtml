@@ -1,0 +1,78 @@
+﻿@RenderPage("~/Shared/global/_Header.cshtml")
+        <!-- Page Content -->
+        <div class="container-fluid">
+
+            !-- Special version of Bootstrap that only affects content wrapped in .bootstrap-iso -->
+            <link rel="stylesheet" href="https://formden.com/static/cdn/bootstrap-iso.css" /> 
+
+            <div class='row'>
+                <div class='container contact-form'>
+                    <h1>Contact Form</h1>
+
+                    <div class='row'>
+                        <div class="bootstrap-iso">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <form method="post">
+                                            <div class="form-group ">
+                                                <label class="control-label requiredField" for="name">
+                                                    Name
+                                                    <span class="asteriskField">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <input class="form-control" id="name" name="name" type="text"/>
+                                            </div>
+                                            <div class="form-group ">
+                                                <label class="control-label requiredField" for="email">
+                                                    Email
+                                                    <span class="asteriskField">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <input class="form-control" id="email" name="email" type="text"/>
+                                            </div>
+                                            <div class="form-group ">
+                                                <label class="control-label requiredField" for="subject">
+                                                    Subject
+                                                    <span class="asteriskField">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <input class="form-control" id="subject" name="subject" type="text"/>
+                                            </div>
+                                            <div class="form-group ">
+                                                <label class="control-label requiredField" for="message">
+                                                    Message
+                                                    <span class="asteriskField">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <textarea class="form-control" cols="40" id="message" name="message" rows="10"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <div>
+                                                    <button class="btn btn-primary " name="submit" type="submit">
+                                                        Submit
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class='col-md-6 pull-right contact-form-extra'>
+                                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24207.292857416476!2d-4.153370220554318!3d50.37628314262974!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x486c8d530e95ea3d%3A0x3b282cb5cef58593!2sPlymouth!5e0!3m2!1sen!2suk!4v1455557596762" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+            </div> 
+        </div> 
+
+ @RenderPage("~/Shared/global/_Footer.cshtml")

@@ -1,0 +1,102 @@
+﻿@using Newtonsoft.Json;
+@{
+    int eventIndicator = 0;
+
+    if (Request.QueryString["id"] != null)
+    {
+        eventIndicator = int.Parse(Request.QueryString["id"]);
+    }
+    else {
+        Response.Redirect("~/error.cshtml");
+    }
+
+    List<Events> EventNames = new List<Events>();
+    List<EventDays> EventDays = new List<EventDays>();
+    List<VenueRooms> VenueRoomsList = new List<VenueRooms>();
+
+    using (WebClient wc = new WebClient())
+    {
+        var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/events");
+        EventNames = JsonConvert.DeserializeObject<List<Events>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/eventdays");
+        EventDays = JsonConvert.DeserializeObject<List<EventDays>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/venuerooms");
+        VenueRoomsList = JsonConvert.DeserializeObject<List<VenueRooms>>(json);
+    }
+
+    Events myEvent = new Events();
+    List<EventDays> theDays = new List<EventDays>();
+
+    foreach (var item in EventNames)
+    {
+        if (item.EVENT_ID == eventIndicator)
+        {
+            myEvent = item;
+        }
+    }
+
+    foreach (var item in EventDays)
+    {
+        if (item.EVENT_ID == myEvent.EVENT_ID)
+        {
+            theDays.Add(item);
+        }
+    }
+
+    foreach (var item in EventNames)
+    {
+        DateTime startDate = DateTime.Parse(item.START_DATE);
+        DateTime endDate = DateTime.Parse(item.END_DATE);
+        item.START_DATE = startDate.Date.ToString("d MMMM");
+        item.END_DATE = endDate.Date.ToString("d MMMM");
+    }
+
+    foreach (var item in VenueRoomsList)
+    {
+        foreach (var day in theDays)
+        {
+            if (day.VENUE_ROOM_ID == item.VENUE_ROOM_ID)
+            {
+                day.addVenueRooms(item);
+            }
+        }
+    }
+
+    foreach (var item in theDays)
+    {
+        DateTime dayDate = DateTime.Parse(item.EVENT_DAY_DATE);
+        item.EVENT_DAY_DATE = dayDate.Date.ToString("d MMMM");
+    }
+
+}
+
+
+@RenderPage("~/Shared/global/_Header.cshtml")
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 specficDaysContainer">
+            <h1>@myEvent.EVENT_NAME,  @myEvent.START_DATE - @myEvent.END_DATE </h1>
+            <form class="form-horizontal" action="/grabEvent.cshtml?id=@eventIndicator&days=1" method="post">
+                <fieldset>
+                    <!-- Multiple Radios -->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="radios">Select Days</label>
+                        <div class="col-md-4">
+                            @{int VenueCounter = 0;}
+                            @foreach (var item in theDays)
+                            {
+                                <div class="checkbox">
+                                    <label><input type="checkbox" name="@item.EVENT_DAY_ID" value="">@item.EVENT_DAY_DATE - @item.getVenueRoom().ROOM_NAME </label>
+                                </div>
+                                VenueCounter++;
+                            }
+                        </div>
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn btn-default">Procced to Checkout</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@RenderPage("~/Shared/global/_Footer.cshtml")

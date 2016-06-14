@@ -1,0 +1,146 @@
+﻿@using Newtonsoft.Json;
+@{
+
+//this project make heavy use of the bootstrap framework for HTML and CSS you can find bootstrap at http://getbootstrap.com/
+//The website also contains various images of companies that are used for demonstration purposes at all time and are not
+//diretly affliated with the application it self. All front end libaries have been referenced where they are called,
+//of which all are open source and free for public use.
+
+
+}
+@{
+    //Reseting order session.
+    if (Session["order"] != null)
+    {
+        Session["order"] = null;
+    }
+
+    //events List
+    List<Events> EventNames = new List<Events>();
+
+    // grab all event information.
+    using (WebClient wc = new WebClient())
+    {
+        var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/events");
+        EventNames = JsonConvert.DeserializeObject<List<Events>>(json);
+    }
+
+    //Format event dates into user friendly content.
+    foreach (var item in EventNames)
+    {
+        DateTime startDate = DateTime.Parse(item.START_DATE);
+        DateTime endDate = DateTime.Parse(item.END_DATE);
+        item.START_DATE = startDate.Date.ToString("d MMMM yyyy");
+        item.END_DATE = endDate.Date.ToString("d MMMM yyyy");
+    }
+
+    int counter = 0;
+}
+
+@RenderPage("~/Shared/global/_Header.cshtml")
+<!-- Page Content -->
+<div class="container-fluid events-homepage">
+    <div class="row">
+        <div class='container'>
+            <div class="row">
+                <div class="col-lg-12 category-tiles">
+                    @*tiles start here*@
+                    @foreach (var item in EventNames)
+                    {
+                        //only 8 of the newest event, can change to 12.
+                        if (counter != 8)
+                        {
+                            //comparisions to make sure date is relevant
+                            int result = DateTime.Compare(DateTime.Parse(item.START_DATE), DateTime.Now);
+
+                            if (result > 0)
+                            {
+
+                                <div class="info Tiles">
+                                    <div class="col-xs-3">
+                                        <div class="info-card">
+                                            <img style="width: 100%" src="@item.getImageData()" />
+                                            <div class="info-card-details animate">
+                                                <div class="info-card-header homepageFormatting text-center">
+                                                    <h1>@item.EVENT_NAME</h1>
+                                                    <h3>@item.START_DATE til @item.END_DATE </h3>
+                                                </div>
+                                                <div class="info-card-detail">
+                                                    <!-- Description -->
+                                                    <p>@item.EVENT_DETAILS</p>
+                                                    <div class="furtherInfo">
+                                                        <a class="btn btn-default" href="~/item.cshtml?id=@item.EVENT_ID">View Event Page</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                counter++;
+                            }
+                        }
+                    }
+                    @*tiles end*@
+                </div>
+            </div>
+
+            <div class="col-lg-12 events-infoSection-homepage">
+                <h1>Our latest upcoming events</h1>
+                <a class="btn btn-default" style="background-color: #0090ac; color: white;" href="~/category.cshtml">View More</a>
+                <a class="btn btn-default" style="background-color: #0090ac; color: white;" data-toggle="modal" href="#" data-target="#myModal">Search for an Event <span class="fa fa-search"></span></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid appCol">
+    <div class="row">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 text-center appCol-appInfo">
+                    <h2>Awesome Events Anywhere Whenever!</h2>
+                    <p>At Plymouth events we think paper is just old fashioned and annoying, using our app you'll be able to purchase tickets for some of the most exciting and upcoming events and all you have to do is show your ticket from our app.. Festivals to laser tag we're sure you'll love our attention to detail and enjoy booking through us.  </p>
+                    <h3>Don't miss out on all the excitement..</h3>
+                    <div class='googleStoreIcon'>
+                        <a href='#'>
+                            <img src='img/googlePlay.jpg'>
+                            <h4>Google Market</h4>
+                        </a>
+                    </div>
+
+                    <div class='heart'>
+                        <img class='heartIcon' src='img/heart.jpg'>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-6">
+                    <img src="img/ticketphone.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid indexLogos">
+    <div class="row">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <img src="img/indexLogos/logo1.jpg">
+                </div>
+                <div class="col-lg-3">
+                    <img src="img/indexLogos/logo2.jpg">
+                </div>
+                <div class="col-lg-3">
+                    <img src="img/indexLogos/logo3.jpg">
+                </div>
+                <div class="col-lg-3">
+                    <img src="img/indexLogos/logo4.jpg">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@RenderPage("~/Shared/global/_Footer.cshtml")

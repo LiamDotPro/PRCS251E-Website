@@ -1,0 +1,249 @@
+﻿@using Newtonsoft.Json;
+@{
+    Persons loggedmember = null;
+
+    //Checking if member Session exsists
+    if (Session["member"] != null)
+    {
+        loggedmember = (Persons)Session["member"];
+    }
+    else {
+        Response.Redirect("~/index.cshtml");
+    }
+
+    //Lists for API driven data
+    List<Bookings> CurrentBookings = new List<Bookings>();
+    List<BookingLines> BookingLines = new List<BookingLines>();
+    List<TicketAllocation> ticketAllocations = new List<TicketAllocation>();
+    List<Events> EventNames = new List<Events>();
+    List<EventDays> EventDays = new List<EventDays>();
+
+    // Grabing user data
+    using (WebClient wc = new WebClient())
+    {
+
+        var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/bookings");
+        CurrentBookings = JsonConvert.DeserializeObject<List<Bookings>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/Modules/INTPROJ/PRCS251E/Api/BookingLines");
+        BookingLines = JsonConvert.DeserializeObject<List<BookingLines>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/Modules/INTPROJ/PRCS251E/Api/TicketAllocations");
+        ticketAllocations = JsonConvert.DeserializeObject<List<TicketAllocation>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/Modules/INTPROJ/PRCS251E/Api/eventdays");
+        EventDays = JsonConvert.DeserializeObject<List<EventDays>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/events");
+        EventNames = JsonConvert.DeserializeObject<List<Events>>(json);
+    }
+
+    // current bookings list - holds bookings.
+    List<CurrentBookings> UserBookings = new List<CurrentBookings>();
+
+    //Assigning current bookings.
+    foreach (var item in CurrentBookings)
+    {
+        foreach (var booking in BookingLines)
+        {
+            if (booking.findAssociatedBookingLines(item.BOOKING_ID) == true)
+            {
+                if (loggedmember.PERSON_ID == item.PERSON_ID)
+                {
+                    UserBookings.Add(new CurrentBookings(item.BOOKING_DATE, item.BOOKING_ID));
+                }
+            }
+
+        }
+
+    }
+
+    // Adding orderlines to user bookings.
+    foreach (var item in UserBookings)
+    {
+        foreach (var booking in BookingLines)
+        {
+            if (item.getBookingID() == booking.BOOKING_ID)
+            {
+                item.addOrderLine(booking);
+            }
+
+        }
+    }
+
+    // Adding ticket allocations to user bookings.
+    foreach (var allocation in ticketAllocations)
+    {
+        foreach (var item in UserBookings)
+        {
+            foreach (var orderline in item.getOrderLine())
+            {
+                if (orderline.getTicketAllocationID() == allocation.TICKET_ALLOCATION_ID)
+                {
+                    orderline.setTicketAllocation(allocation);
+                }
+            }
+
+        }
+    }
+
+    // Adding specific eventdays
+    foreach (var item in UserBookings)
+    {
+        foreach (var siteEventDays in EventDays)
+        {
+            foreach (var orderLine in item.getOrderLine())
+            {
+                if (orderLine.getTicketAllocation().EVENT_DAY_ID == siteEventDays.EVENT_DAY_ID)
+                {
+                    item.addEventDays(siteEventDays);
+                }
+            }
+
+        }
+    }
+
+    // Adding site events to userbookings
+    foreach (var item in UserBookings)
+    {
+        foreach (var siteEvents in EventNames)
+        {
+            if (item.getEventID() == siteEvents.getEventID())
+            {
+                item.setEvent(siteEvents);
+            }
+
+        }
+    }
+
+    // Adding event venues to user bookings
+    foreach (var item in UserBookings)
+    {
+        item.addEventDayVenues();
+    }
+
+}
+
+@RenderPage("~/cms/shared/cms_header.cshtml")
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 cms-Home">
+                <h1><i class="fa fa-ticket"></i> Bookings </h1>
+                <hr>
+            </div>
+
+            <!--     Current Booking Table-->
+            <div class="col-lg-12 cms-current-bookings">
+                <header class="panel-heading"> Your Current Bookings</header>
+                <table class="table table-striped table-Modify">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Booking Ref</th>
+                            <th>Cost</th>
+                            <th>Location</th>
+                            <th>Date and Starting Time</th>
+                            <th data-toggle="modal" data-target="#myModal">Status <a><i class="fa fa-question-circle"></i></a></th>
+                            <th>Event Page</th>
+                            <th>Print Tickets</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in UserBookings)
+                        {
+                            foreach (var booking in item.getOrderLine())
+                            {
+                                int result = DateTime.Compare(DateTime.Parse(item.getEventObj().START_DATE), DateTime.Now);
+
+                                if (result > 0)
+                                {
+                                    //Ticket information being outputted based on when end date of event is.
+
+                                    <tr>
+                                        <td>@item.getEventName()</td>
+                                        <td>@booking.BOOKING_LINE_ID</td>
+                                        <td>£@booking.COST_PAID</td>
+                                        <td>@item.getVenue(booking.BOOKING_LINE_ID)</td>
+                                        <td>@item.getStartAndEndDateTime(booking.BOOKING_LINE_ID)</td>
+                                        <td class="processed">Processed</td>
+                                        <td>
+                                            <a href="~/item.cshtml?id=@item.getEventID()" target="_blank" class="btn btn-default"><i class="fa fa-external-link"></i></a>
+                                        </td>
+                                        <td>
+                                            <a href="#" class="btn btn-default"><i class="fa fa-print"></i> Print</a>
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+
+            <div class="col-lg-12 cms-previous-bookings">
+                <header class="panel-heading"> Your Previous Bookings</header>
+                <table class="table table-striped table-Modify">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Booking Ref</th>
+                            <th>Cost</th>
+                            <th>Location</th>
+                            <th>Date and Starting Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in UserBookings)
+                        {
+                            foreach (var booking in item.getOrderLine())
+                            {
+                                DateTime myDate = DateTime.Parse(item.getEventEndDate());
+
+                                int Presult = DateTime.Compare(myDate, DateTime.Now);
+
+                                if (Presult < 0)
+                                {
+                                    //Previous events being outputted.
+
+                                    <tr>
+                                        <td>@item.getEventName()</td>
+                                        <td>@booking.BOOKING_LINE_ID</td>
+                                        <td>£@booking.COST_PAID</td>
+                                        <td>@item.getVenue(booking.BOOKING_LINE_ID)</td>
+                                        <td>@item.getStartAndEndDateTime(booking.BOOKING_LINE_ID)</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- wrapper -->
+<!-- Status Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Render cms footer-->
+@RenderPage("~/cms/shared/cms_footer.cshtml")

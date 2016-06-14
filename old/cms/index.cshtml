@@ -1,0 +1,171 @@
+﻿@using Newtonsoft.Json;
+@{
+    string firstName = "";
+    Persons loggedmember = null;
+
+
+    if (Session["member"] != null)
+    {
+        loggedmember = (Persons)Session["member"];
+
+        firstName = loggedmember.FORENAME;
+    }
+    else {
+        Response.Redirect("/index.cshtml");
+    }
+
+    List<Bookings> CurrentBookings = new List<Bookings>();
+    List<BookingLines> BookingLines = new List<BookingLines>();
+    List<TicketAllocation> ticketAllocations = new List<TicketAllocation>();
+    List<Events> EventNames = new List<Events>();
+    List<EventDays> EventDays = new List<EventDays>();
+
+    using (WebClient wc = new WebClient())
+    {
+
+        var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/bookings");
+        CurrentBookings = JsonConvert.DeserializeObject<List<Bookings>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/Modules/INTPROJ/PRCS251E/Api/BookingLines");
+        BookingLines = JsonConvert.DeserializeObject<List<BookingLines>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/Modules/INTPROJ/PRCS251E/Api/TicketAllocations");
+        ticketAllocations = JsonConvert.DeserializeObject<List<TicketAllocation>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/Modules/INTPROJ/PRCS251E/Api/eventdays");
+        EventDays = JsonConvert.DeserializeObject<List<EventDays>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/events");
+        EventNames = JsonConvert.DeserializeObject<List<Events>>(json);
+    }
+
+    List<CurrentBookings> UserBookings = new List<CurrentBookings>();
+
+    foreach (var item in EventNames)
+    {
+        DateTime startDate = DateTime.Parse(item.START_DATE);
+        DateTime endDate = DateTime.Parse(item.END_DATE);
+        item.START_DATE = startDate.Date.ToString("d MMMM");
+        item.END_DATE = endDate.Date.ToString("d MMMM");
+    }
+
+    foreach (var item in CurrentBookings)
+    {
+        foreach (var booking in BookingLines)
+        {
+            if (booking.findAssociatedBookingLines(item.BOOKING_ID) == true) {
+                if (loggedmember.PERSON_ID == item.PERSON_ID)
+                {
+                    UserBookings.Add(new CurrentBookings(item.BOOKING_DATE, item.BOOKING_ID));
+                }
+            }
+
+        }
+
+    }
+
+    foreach (var item in UserBookings)
+    {
+        foreach (var booking in BookingLines)
+        {
+            if (item.getBookingID() == booking.BOOKING_ID)
+            {
+                item.addOrderLine(booking);
+            }
+
+        }
+    }
+
+    foreach (var allocation in ticketAllocations)
+    {
+        foreach (var item in UserBookings)
+        {
+            foreach (var orderline in item.getOrderLine())
+            {
+                if (orderline.getTicketAllocationID() == allocation.TICKET_ALLOCATION_ID)
+                {
+                    orderline.setTicketAllocation(allocation);
+                }
+            }
+
+        }
+    }
+
+    foreach (var item in UserBookings)
+    {
+        foreach (var siteEventDays in EventDays)
+        {
+            foreach (var orderLine in item.getOrderLine())
+            {
+                if (orderLine.getTicketAllocation().EVENT_DAY_ID == siteEventDays.EVENT_DAY_ID)
+                {
+                    item.addEventDays(siteEventDays);
+                }
+            }
+
+        }
+    }
+
+    foreach (var item in UserBookings)
+    {
+        foreach (var siteEvents in EventNames)
+        {
+            if (item.getEventDaysCount() > 0) {
+                if (item.getEventID() == siteEvents.getEventID())
+                {
+                    item.setEvent(siteEvents);
+                }
+            }
+
+        }
+    }
+
+    foreach (var item in UserBookings)
+    {
+        item.addEventDayVenues();
+    }
+
+
+}
+
+
+@RenderPage("~/cms/shared/cms_header.cshtml")
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 cms-Home">
+                <h1><i class="fa fa-home"></i> Home</h1>
+                <h4>Welcome back @firstName here's your dashboard...</h4>
+                <hr>
+            </div>
+
+            <div class="col-lg-12 recentBookingsBlock">
+                <h2>Your Upcoming Bookings</h2>
+                <div class="row">
+
+                    @foreach (var item in UserBookings)
+                    {
+                        <div class="col-xs-2">
+                            <div class="info-card">
+                                <img style="width: 100%" src="data:image/jpg;base64, @item.getEventObj().getImageData()" />
+                                <div class="info-card-details animate">
+                                    <div class="info-card-header ">
+                                        <h1> @item.getEventName()</h1>
+                                        <h3>@item.getEventStartDate() til @item.getEventEndDate()</h3>
+                                    </div>
+                                    <div class="info-card-detail">
+                                        <!-- Description -->
+                                        <p></p>
+                                        <div class="furtherInfo">
+                                            <a class="btn btn-default" href="~/cms/bookings.html">View Booking Details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <!--    !endCards-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Render cms footer-->
+@RenderPage("~/cms/shared/cms_footer.cshtml")

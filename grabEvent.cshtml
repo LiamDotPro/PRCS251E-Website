@@ -1,0 +1,138 @@
+﻿@using Newtonsoft.Json;
+@{
+    int eventIndicator = 0;
+    string passedInformation = "";
+    string ExtraInformation = "";
+
+    //get Event ID from query string
+    if (Request.QueryString["id"] != null)
+    {
+        eventIndicator = int.Parse(Request.QueryString["id"]);
+    }
+    else {
+        Response.Redirect("~/error.cshtml");
+    }
+
+    //get Days query string and process for output queryString
+    if (Request.QueryString["days"] != null)
+    {
+        //Book an event for a specfic day..
+        passedInformation = "day=";
+        foreach (string item in Request.Form.Keys)
+        {
+            passedInformation += int.Parse(item) + ",";
+        }
+
+    }
+    else if (Request.QueryString["day"] != null)
+    {
+        //Book for a single day
+        passedInformation = "day=";
+        passedInformation += Request.QueryString["day"];
+
+    }
+    else {
+        //book for whole event.
+        passedInformation = "wholeEvent=1";
+    }
+
+    //if no member session has been passed.
+    if (Session["member"] != null)
+    {
+        Response.Redirect("~/checkout.cshtml?id=" + eventIndicator + "&member=1&" + passedInformation);
+    }
+
+    // Checks member login.
+    if (Request.QueryString["member"] != null)
+    {
+        List<Accounts> accountDetails = new List<Accounts>();
+        List<Persons> personList = new List<Persons>();
+
+        Persons SelectedUser = new Persons();
+
+        using (WebClient wc = new WebClient())
+        {
+            var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/accounts");
+            accountDetails = JsonConvert.DeserializeObject<List<Accounts>>(json);
+            json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/persons");
+            personList = JsonConvert.DeserializeObject<List<Persons>>(json);
+        }
+
+        //Login check
+        foreach (var item in personList)
+        {
+            if (Request.Form["email"] == item.EMAIL)
+            {
+                SelectedUser = item;
+                foreach (var pass in accountDetails)
+                {
+                    if (SelectedUser.PERSON_ID == pass.PERSON_ID)
+                    {
+                        if (Request.Form["password"] == pass.PASSWORD)
+                        {
+                            //correct login
+                            Session["member"] = SelectedUser;
+                            Response.Redirect("~/checkout.cshtml?id=" + eventIndicator + "&member=1&" + passedInformation);
+                        }
+                        else {
+                            //password incorrect.
+                            ExtraInformation = "You have enetered an incorrect email or password please try again.";
+                        }
+                    }
+                }
+            }
+            else {
+                ExtraInformation = "You have enetered an incorrect email or password please try again.";
+            }
+        }
+    }
+}
+@RenderPage("~/Shared/global/_Header.cshtml")
+
+<div class="container external_login">
+    <div class="row">
+        <div class="col-lg-6 guestSection">
+            <h1> Continue as a Guest</h1>
+            <p>If you do not wish to make an account with our service you can make your purchase as a guest below. Please note that once you have made you're order you will be presented with an option to print your ticket and emailed a followup receipt of purchase.</p>
+            <a href="~/checkout.cshtml?id=@eventIndicator&guest=1&@passedInformation" class="btn btn-default">Continue as Guest</a>
+        </div>
+
+        <div class="col-lg-6 normal_login">
+            <h1> Exsisting account login</h1>
+            <form class="form-horizontal" method="post" action="~/grabEvent.cshtml?id=@eventIndicator&member=1&@passedInformation">
+                <fieldset>
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="textinput">Email Address:</label>
+                        <div class="col-md-4">
+                            <input id="textinput" name="email" class="form-control input-md" type="text" required>
+                        </div>
+                    </div>
+
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="textinput">Password:</label>
+                        <div class="col-md-4">
+                            <input id="textinput" name="password" class="form-control input-md" type="password" required>
+                        </div>
+                    </div>
+
+                    <!-- Button -->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="singlebutton">Accept & login</label>
+                        <div class="col-md-4">
+                            <button id="singlebutton" name="singlebutton" class="btn btn-primary" type="submit">Login</button>
+                        </div>
+                       
+                    </div>
+                    <h5 style="padding-top: 10px;"><b>@ExtraInformation</b></h5>
+                    <h5 style="padding-top: 20px;">By registering an account with our service you'll be able to print out tickets at a later date or use our mobile app to present tickets.</h5>
+                    <a href="~/Register.cshtml" class="btn btn-success">Register Account</a>
+                    
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+
+@RenderPage("~/Shared/global/_Footer.cshtml")

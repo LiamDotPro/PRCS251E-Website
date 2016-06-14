@@ -1,0 +1,87 @@
+﻿@using Newtonsoft.Json;
+@{
+    //List for events
+    List<Events> EventNames = new List<Events>();
+
+    // grab API Data
+    using (WebClient wc = new WebClient())
+    {
+        var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/events");
+        EventNames = JsonConvert.DeserializeObject<List<Events>>(json);
+    }
+
+    //Format date and time to be user friendly.
+    foreach (var item in EventNames)
+    {
+        DateTime startDate = DateTime.Parse(item.START_DATE);
+        DateTime endDate = DateTime.Parse(item.END_DATE);
+        item.START_DATE = startDate.Date.ToString("d MMMM yyyy");
+        item.END_DATE = endDate.Date.ToString("d MMMM yyyy");
+    }
+
+}
+@RenderPage("~/Shared/global/_Header.cshtml")
+<!-- Page Content -->
+<div class="container-fluid">
+    <div class="row">
+        <div class='container'>
+            <div class="row">
+                <div id="users">
+
+                    <div class='col-lg-12 categoryEvents'>
+                        <div class="col-lg-12 categories-search">
+                            <h1>Search Events</h1>
+                            <div id="custom-search-input">
+                                <div class="input-group col-md-12">
+                                    <input type="text" class="form-control input-lg search" value="@Request.Params["search"]" placeholder="Search for an event" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-info btn-lg sort" type="button" data-sort="name">
+                                            <i class="glyphicon glyphicon-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 category-tiles-event">
+                        <ul style="list-style: none; margin-left: 0; padding-left: 0;" class="list">
+                            @foreach (var item in EventNames)
+                            {
+                                int result = DateTime.Compare(DateTime.Parse(item.START_DATE), DateTime.Now);
+
+                                if (result > 0)
+                                {
+                                <li>
+                                    <div class="info Tiles">
+                                        <div class="col-xs-3">
+                                            <div class="info-card">
+                                                <img style="width: 100%" src="@item.getImageData()" />
+                                                <div class="info-card-details animate">
+                                                    <div class="info-card-header homepageFormatting text-center">
+                                                        <h1  class="name">@item.EVENT_NAME</h1>
+                                                        <h3  class="description">@item.START_DATE til @item.END_DATE </h3>
+                                                    </div>
+                                                    <div class="info-card-detail">
+                                                        <!-- Description -->
+                                                        <p>@item.EVENT_DETAILS</p>
+                                                        <div class="furtherInfo">
+                                                            <a class="btn btn-default" href="~/item.cshtml?id=@item.EVENT_ID">View Event Page</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@RenderPage("~/Shared/global/_Footer.cshtml")

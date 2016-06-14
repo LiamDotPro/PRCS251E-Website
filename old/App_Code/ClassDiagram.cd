@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Accounts">
+    <Position X="0.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAgACAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>App_Code\Accounts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BookingLines">
+    <Position X="2.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAIAAACAAAAAAAACiCAAAAAAAAAAAFAABAAAAA=</HashCode>
+      <FileName>App_Code\BookingLines.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Bookings">
+    <Position X="4" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAAAAAAACBAAAAAAQAAAAAAAAAAAAAA=</HashCode>
+      <FileName>App_Code\Bookings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CurrentBookings">
+    <Position X="5.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACIAAIAgggAiEIwQCCAAAAAUAQAAAAAAoEEABIEAAAA=</HashCode>
+      <FileName>App_Code\CurrentBookings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EventDays">
+    <Position X="12.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAEIAAAAABAQAAAAAABKCEBASQAAAgQAAAAAQIAIA=</HashCode>
+      <FileName>App_Code\EventDays.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Events">
+    <Position X="11" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAIgACAAAAgAAAAQASAwAEAAAAAAAAAAAAYRgAAAA=</HashCode>
+      <FileName>App_Code\Events.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EventTypes">
+    <Position X="4" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>App_Code\EventTypes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="images">
+    <Position X="11" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAgEQAAAAAAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>App_Code\images.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="order">
+    <Position X="7.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAgCCAAAAAIACABwISABAIOAAJACAAACDkgAAI=</HashCode>
+      <FileName>App_Code\order.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Persons">
+    <Position X="0.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAgAAACAAAAQIAgEAAAACAAEAIAAAAAAAAgCCAAQA=</HashCode>
+      <FileName>App_Code\Persons.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tags">
+    <Position X="9.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAAAAAAgAAAAAAAACAAAAAAAAAIAIAAAAAA=</HashCode>
+      <FileName>App_Code\Tags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TicketAllocation">
+    <Position X="9.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAABAAAAAAAAAAIACQAAAAAAAAEEAAAAAAA=</HashCode>
+      <FileName>App_Code\TicketAllocation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="VenueRooms">
+    <Position X="9.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAAgAAAAABAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>App_Code\VenueRooms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="venues">
+    <Position X="2.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAAIAggAgAAAAAEAAAAAAAQAAgCAAAAA=</HashCode>
+      <FileName>App_Code\Venues.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

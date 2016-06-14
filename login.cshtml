@@ -1,0 +1,96 @@
+﻿@using Newtonsoft.Json;
+@{
+    string ExtraInformation = "";
+
+    if (Request.Form["email"] != null)
+    {
+        List<Accounts> accountDetails = new List<Accounts>();
+        List<Persons> personList = new List<Persons>();
+
+        Persons SelectedUser = new Persons();
+
+        using (WebClient wc = new WebClient())
+        {
+            var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/accounts");
+            accountDetails = JsonConvert.DeserializeObject<List<Accounts>>(json);
+            json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/persons");
+            personList = JsonConvert.DeserializeObject<List<Persons>>(json);
+        }
+
+        //Checks to see if passwords matches account using PERSONS table - Needs hashing.
+        foreach (var item in personList)
+        {
+            if (Request.Form["email"].ToLower() == item.EMAIL)
+            {
+                SelectedUser = item;
+                foreach (var pass in accountDetails)
+                {
+                    if (SelectedUser.PERSON_ID == pass.PERSON_ID)
+                    {
+                        if (Request.Form["password"] == pass.PASSWORD)
+                        {
+                            //password correct.
+                            Session["member"] = SelectedUser;
+                            Response.Redirect("~/cms/index.cshtml");
+                        }
+                        else {
+                            //password incorrect.
+                            ExtraInformation = "You have enetered an incorrect email or password please try again.";
+                        }
+                    }
+                }
+            }
+            else {
+                ExtraInformation = "You have enetered an incorrect email or password please try again.";
+            }
+        }
+    }
+}
+
+@RenderPage("~/Shared/global/_Header.cshtml")
+<div class="container noImage-shaper loginForm">
+    <div class="row">
+        <div class="col-lg-12 loginFormDiv">
+
+            <img src='img/logo.png'>
+            <h1>Plymouth Events Login</h1>
+
+            <form class="form-horizontal" method="post" action="~/login.cshtml">
+                <fieldset>
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="textinput">Email Address:</label>
+                        <div class="col-md-4">
+                            <input id="textinput" name="email" class="form-control input-md" type="text">
+                        </div>
+                    </div>
+
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="textinput">Password:</label>
+                        <div class="col-md-4">
+                            <input id="textinput" name="password" class="form-control input-md" type="password">
+                            <span class="help-block">If you've forgotten your password <a href='lostInfo.html'>click here</a></span>
+                        </div>
+                    </div>
+
+                    <!-- Button -->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="singlebutton">Accept & login</label>
+                        <div class="col-md-4">
+                            <button id="singlebutton" name="singlebutton" class="btn btn-primary" type="submit">Login</button>
+                        </div>
+                    </div>
+                    <h5 style="padding-top: 10px; text-align: center;"><b>@ExtraInformation</b></h5>
+                    <div class="text-center " style="padding-top:30px;">
+                        <h5 style="padding-top: 20px; text-align: center;">By registering an account with our service you'll be able to print out tickets at a later date or use our mobile app to present tickets.</h5>
+                        <a style="text-align:center;" href="~/Register.cshtml" class="btn btn-success">Register here</a>
+
+                    </div>
+
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div> <!-- /container -->
+@RenderPage("~/Shared/global/_Footer.cshtml")

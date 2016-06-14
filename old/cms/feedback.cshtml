@@ -1,0 +1,32 @@
+﻿@RenderPage("~/cms/shared/cms_header.cshtml")
+
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 cms-Home">
+                <h1><i class="fa fa-bell"></i> Feedback</h1>
+                <hr>
+            </div>
+
+            <div class="col-lg-12 recentBookingsBlock">
+                <div class="row">
+                    <div class="cms-helpBlocks">
+                        <div class="feedback">
+                            <p>How could we improve your experience as a user with our software? By using the textbox below you can tell us your thoughts and directly contribute to the website.</p>
+
+                            <textarea class="form-control" rows="3" style="width: 50%"></textarea>
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <a href="#" class="btn btn-primary"> Send Feedback</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Render cms footer-->
+    @RenderPage("~/cms/shared/cms_footer.cshtml")

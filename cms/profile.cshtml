@@ -1,0 +1,128 @@
+﻿@{
+    Persons loggedmember = null;
+    //response for updating.
+    string response = "";
+
+    //check for existsing user session
+    if (Session["member"] != null)
+    {
+        loggedmember = (Persons)Session["member"];
+    }
+    else {
+        Response.Redirect("~/index.cshtml");
+    }
+
+    //if form is submitted
+    if (Request.Form.Keys.Count > 0) {
+        Persons updatedRecords = new Persons();
+
+        updatedRecords.PERSON_ID = loggedmember.PERSON_ID;
+        updatedRecords.FORENAME = Request.Form["forename"];
+        updatedRecords.SURNAME = Request.Form["surname"];
+        updatedRecords.EMAIL = Request.Form["email"];
+        updatedRecords.ADDRESS_LINE_ONE = Request.Form["addr1"];
+        updatedRecords.ADDRESS_LINE_TWO = Request.Form["addr2"];
+        updatedRecords.COUNTY = Request.Form["county"];
+        updatedRecords.CITY = Request.Form["city"];
+        updatedRecords.COUNTRY = Request.Form["country"];
+        updatedRecords.POSTCODE = Request.Form["postCode"];
+        updatedRecords.DOB = DateTime.Parse(Request.Form["dob"]).ToString("yyyy/MM/dd HH:mm:ss");
+        updatedRecords.PHONE_NUMBER = Request.Form["contactNumber"];
+
+        response = loggedmember.updateUser(updatedRecords);
+
+
+
+    }
+
+}
+
+@RenderPage("~/cms/shared/cms_header.cshtml")
+@*Outputing user data in a form for edtiting*@
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <h4>@response</h4>
+        <h1 style="padding-bottom:30px;">Edit Profile</h1>
+        <form class="form-horizontal" action="~/cms/profile.cshtml" method="post">
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Forname</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.FORENAME " class="form-control" name="forename" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Surname</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.SURNAME" class="form-control" name="surname" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Email</label>
+                <div class="col-sm-9">
+                    <input type="email" value="@loggedmember.EMAIL" class="form-control" name="email" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Address line one</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.ADDRESS_LINE_ONE" class="form-control" name="addr1" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Address line two</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.ADDRESS_LINE_TWO " class="form-control" name="addr2" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">County</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.COUNTY" class="form-control" name="county" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">City</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.CITY" class="form-control" name="city" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Country</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.COUNTRY" class="form-control" name="country" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Post Code</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.POSTCODE" class="form-control" name="postCode" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Date of Birth</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.formatUserDOB()" class="form-control" name="dob" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Contact Number</label>
+                <div class="col-sm-9">
+                    <input type="text" value="@loggedmember.PHONE_NUMBER" class="form-control" name="contactNumber" id="card-holder-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="card-holder-name">Accept Changes</label>
+                <div class="col-sm-2"> 
+                    <button class="btn btn-success" type="submit">Yes</button>
+                    <a class="btn btn-danger" href="~/cms/index.cshtml">Cancel</a>
+                </div>
+            </div>
+
+        </form>
+
+
+    </div>
+</div>
+
+<!--Render cms footer-->
+@RenderPage("~/cms/shared/cms_footer.cshtml")

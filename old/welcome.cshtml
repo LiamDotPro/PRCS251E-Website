@@ -1,0 +1,16 @@
+﻿@RenderPage("~/Shared/global/_Header.cshtml")
+<div style="padding-top: 30px; padding-bottom:250px;" class="container">
+    <div class="row">
+        <h1>Thanks for registering @Session["user"] !</h1>
+        <h3>You can choose to login to the user dashboard below or view events here!</h3>
+        <div style="padding-top: 30px;">
+            <a class="btn btn-default" href="~/login.cshtml">Login</a>
+            <a class="btn btn-default" href="~/index.cshtml">Home</a>
+            <a class="btn btn-default" href="~/category.cshtml">Events</a>
+        </div>
+      
+    </div>
+</div>
+
+
+@RenderPage("~/Shared/global/_Footer.cshtml")

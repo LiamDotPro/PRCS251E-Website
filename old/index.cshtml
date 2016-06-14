@@ -1,0 +1,126 @@
+﻿@using Newtonsoft.Json;
+@{
+
+    if (Session["order"] != null)
+    {
+        Session["order"] = null;
+    }
+
+    List<Events> EventNames = new List<Events>();
+
+    using (WebClient wc = new WebClient())
+    {
+        var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/events");
+        EventNames = JsonConvert.DeserializeObject<List<Events>>(json);
+    }
+
+    foreach (var item in EventNames)
+    {
+        DateTime startDate = DateTime.Parse(item.START_DATE);
+        DateTime endDate = DateTime.Parse(item.END_DATE);
+        item.START_DATE = startDate.Date.ToString("d MMMM");
+        item.END_DATE = endDate.Date.ToString("d MMMM");
+    }
+
+    int counter = 0;
+}
+
+@RenderPage("~/Shared/global/_Header.cshtml")
+<!-- Page Content -->
+<div class="container-fluid events-homepage">
+    <div class="row">
+        <div class='container'>
+            <div class="row">
+                <div class="col-lg-12 category-tiles">
+                    @*tiles start here*@
+                    @foreach (var item in EventNames)
+                    {
+                        if (counter != 8)
+                        {
+                            <div class="info Tiles">
+                                <div class="col-xs-3">
+                                    <div class="info-card">
+                                        <img style="width: 100%" src="data:image/jpg;base64, @item.getImageData()" />
+                                        <div class="info-card-details animate">
+                                            <div class="info-card-header text-center">
+                                                <h1>@item.EVENT_NAME</h1>
+                                                <h3>@item.START_DATE til @item.END_DATE </h3>
+                                            </div>
+                                            <div class="info-card-detail">
+                                                <!-- Description -->
+                                                <p>@item.EVENT_DETAILS</p>
+                                                <div class="furtherInfo">
+                                                    <a class="btn btn-default" href="~/item.cshtml?id=@item.EVENT_ID">View Event Page</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            counter++;
+                        }
+                    }
+                    @*tiles end*@
+                </div>
+            </div>
+
+            <div class="col-lg-12 events-infoSection-homepage">
+                <h1>Our latest upcoming events</h1>
+                <a class="btn btn-default" style="background-color:#0090ac; color:white; " href="~/category.cshtml">View More</a>
+                <a class="btn btn-default" style="background-color:#0090ac; color:white; " data-toggle="modal" href="#" data-target="#myModal">Search for an Event <span class="fa fa-search"></span></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid appCol">
+    <div class="row">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 text-center appCol-appInfo">
+                    <h2>Awesome Events Anywhere Whenever!</h2>
+                    <p>At Plymouth events we think paper is just old fashioned and annoying, using our app you'll be able to purchase tickets for some of the most exciting and upcoming events and all you have to do is show your ticket from our app.. Festivals to laser tag we're sure you'll love our attention to detail and enjoy booking through us.  </p>
+                    <h3>Don't miss out on all the excitement..</h3>
+                    <div class='googleStoreIcon'>
+                        <a href='#'>
+                            <img src='img/googlePlay.jpg'>
+                            <h4>Google Market</h4>
+                        </a>
+                    </div>
+
+                    <div class='heart'>
+                        <img class='heartIcon' src='img/heart.jpg'>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-6">
+                    <img src="img/ticketphone.png">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid indexLogos">
+    <div class="row">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <img src="img/indexLogos/logo1.jpg">
+                </div>
+                <div class="col-lg-3">
+                    <img src="img/indexLogos/logo2.jpg">
+                </div>
+                <div class="col-lg-3">
+                    <img src="img/indexLogos/logo3.jpg">
+                </div>
+                <div class="col-lg-3">
+                    <img src="img/indexLogos/logo4.jpg">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@RenderPage("~/Shared/global/_Footer.cshtml")

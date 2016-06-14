@@ -1,0 +1,191 @@
+﻿@using Newtonsoft.Json;
+@{
+
+    int eventIndicator = 0;
+
+    //get event ID
+    if (Request.QueryString["id"] != null)
+    {
+        eventIndicator = int.Parse(Request.QueryString["id"]);
+    }
+    else {
+        Response.Redirect("~/error.cshtml");
+    }
+
+    //Lists for holding API data
+    List<Events> EventNames = new List<Events>();
+    List<EventDays> EventDays = new List<EventDays>();
+    List<VenueRooms> VenueRoomsList = new List<VenueRooms>();
+    List<TicketAllocation> ticketAllocations = new List<TicketAllocation>();
+
+    //Grab API data
+    using (WebClient wc = new WebClient())
+    {
+        var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/events");
+        EventNames = JsonConvert.DeserializeObject<List<Events>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/eventdays");
+        EventDays = JsonConvert.DeserializeObject<List<EventDays>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/venuerooms");
+        VenueRoomsList = JsonConvert.DeserializeObject<List<VenueRooms>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/Venues");
+        ticketAllocations = JsonConvert.DeserializeObject<List<TicketAllocation>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/Modules/INTPROJ/PRCS251E/api/TicketAllocations");
+    }
+
+    //Event information includes days
+    Events myEvent = new Events();
+    List<EventDays> theDays = new List<EventDays>();
+
+    //Grab event information.
+    foreach (var item in EventNames)
+    {
+        if (item.EVENT_ID == eventIndicator)
+        {
+            myEvent = item;
+        }
+    }
+
+    //grab event Days
+    foreach (var item in EventDays)
+    {
+        if (item.EVENT_ID == myEvent.EVENT_ID)
+        {
+            theDays.Add(item);
+        }
+    }
+
+    //make date time information user friendly.
+    foreach (var item in EventNames)
+    {
+        DateTime startDate = DateTime.Parse(item.START_DATE);
+        DateTime endDate = DateTime.Parse(item.END_DATE);
+        item.START_DATE = startDate.Date.ToString("d MMMM");
+        item.END_DATE = endDate.Date.ToString("d MMMM");
+    }
+
+    //add venue rooms to event object
+    foreach (var item in VenueRoomsList)
+    {
+        foreach (var day in theDays)
+        {
+            if (day.VENUE_ROOM_ID == item.VENUE_ROOM_ID)
+            {
+                day.addVenueRooms(item);
+            }
+        }
+    }
+
+    //get ticket allocations for each day
+    foreach (var item in theDays)
+    {
+        item.setTicketAllocation();
+    }
+
+    //format date and time into user friendly format
+    foreach (var item in theDays)
+    {
+        DateTime dayDate = DateTime.Parse(item.EVENT_DAY_DATE);
+        item.EVENT_DAY_DATE = dayDate.Date.ToString("d MMMM");
+    }
+
+    //Create order object.
+    order NewOrder = new order();
+
+    //add event to order
+    NewOrder.setEventOrder(myEvent);
+
+    //if a member session is present add the member to the order object
+    if (Session["member"] != null)
+    {
+        Persons member = (Persons)Session["member"];
+        NewOrder.setMember(member);
+    }
+
+    //checks if whole event has been requested
+    if (Request.Params["wholeEvent"] != null)
+    {
+        foreach (var item in theDays)
+        {
+            NewOrder.setEventDays(item);
+        }
+    }
+    else if (Request.Params["day"] != null)
+    {
+        //add specfic days to neworder
+
+        string s = Request.Params["day"];
+        // Split string on spaces.
+        // ... This will separate all the words.
+        string[] words = s.Split(',');
+        foreach (string word in words)
+        {
+            foreach (var day in theDays)
+            {
+                if (word != "")
+                {
+                    if (double.Parse(word) == day.EVENT_DAY_ID)
+                    {
+                        NewOrder.setEventDays(day);
+                    }
+                }
+            }
+        }
+
+    }
+    // Session is set.
+    Session["order"] = NewOrder;
+}
+
+@RenderPage("~/Shared/global/_Header.cshtml")
+<div class="container-fluid checkoutBody">
+    <div class="row">
+        <div class="container checkoutContainer">
+            <div class="row">
+                <div class="col-lg-12 ">
+                    <h1>Checkout</h1>
+                    <hr>
+                </div>
+
+                <div class="col-lg-12 checkout-eventDescription">
+                    <h1>@NewOrder.getEventName()</h1>
+                    <span">
+                        <span style="font-size: 20px;">@NewOrder.getEventObj().START_DATE til @NewOrder.getEventObj().END_DATE</span>
+                        <form action="payment.cshtml" method="post" name="bookingData">
+                            <div style="padding-top: 20px;">
+                                <h5>event days you are booking for:</h5>
+                                @{
+                                    int daycounter = 1;
+                                    string nameConv = "dayTicket";
+
+                                    foreach (var item in NewOrder.getEventDays())
+                                    {
+                                        <h2>Ticket @daycounter - @item.getVenueRoom().ROOM_NAME <span class="pull-right" style="font-size: 18px;">@item.EVENT_DAY_DATE</span>  </h2>
+
+                                        <h3>Number of Tickets</h3>
+                                        <div class="input-group">
+                                            <span class="input-group-addon" id="basic-addon1"><i class="fa fa-shopping-cart"></i></span>
+                                            <input required type="text" onchange="updatePrice()" value="1" name="@nameConv@daycounter" class="form-control classy-Input" placeholder="no of tickets" aria-describedby="basic-addon1">
+                                        </div>
+                                            <h3>Price Per Ticket - £<span class="eventPrice">@item.getEventDayPrice()</span> - Quantity: @item.getTicketQuantity()</h3>
+                                            <hr style="padding-bottom: 20px;">
+                                        daycounter++;
+                                    }
+
+                                }
+                            </div>
+
+                            <div class="price-seciton">
+                                <h3>
+                                    Confirm your reservations
+                                </h3>
+                                <button type="submit" class="btn btn-success">Continue to payment</button>
+                                <a href="~/index.cshtml" class="btn btn-danger">Cancel Booking</a>
+                            </div>
+                        </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@RenderPage("~/Shared/global/_Footer.cshtml")

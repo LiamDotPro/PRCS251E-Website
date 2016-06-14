@@ -1,0 +1,244 @@
+﻿@using Newtonsoft.Json;
+@{
+    //Lists for API data
+    List<EventTypes> myEventTypes = new List<EventTypes>();
+    List<Events> EventNames = new List<Events>();
+    List<Tags> tagCloudWords = new List<Tags>();
+
+    //grab API data
+    using (WebClient wc = new WebClient())
+    {
+        var json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/EventTypes");
+        myEventTypes = JsonConvert.DeserializeObject<List<EventTypes>>(json);
+        json = wc.DownloadString("http://xserve.uopnet.plymouth.ac.uk/modules/INTPROJ/PRCS251E/api/events");
+        EventNames = JsonConvert.DeserializeObject<List<Events>>(json);
+    }
+
+    //Add Cloud words to object
+    foreach (var item in myEventTypes)
+    {
+        tagCloudWords.Add(new Tags(item.EVENT_TYPE_ID));
+    }
+
+    //if tag name is found in event types increase count
+    foreach (var item in tagCloudWords)
+    {
+        foreach (var events in EventNames)
+        {
+            if (events.EVENT_TYPE_ID == item.getTagName())
+            {
+                item.increaseCount();
+            }
+        }
+
+    }
+
+}
+<footer>
+    <div class="container-fluid footer-top">
+        <div class="row">
+            <img class="footerWaves" src="img/footerTopper.jpg">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-lg-2 col-xs-12 col-md-3 col-sm-6 ftr-list ftr-navigation">
+                        <h4>Navigation</h4>
+                        <ul>
+                            <li>
+                                <a href="~/index.cshtml">Home</a>
+                            </li>
+                            <li>
+                                <a href="~/category.cshtml">Events</a>
+                            </li>
+                            <li>
+                                <a href="~/contact.cshtml">Contact</a>
+                            </li>
+                            <li>
+                                <a href="~/login.cshtml">Login</a>
+                            </li>
+                            <li>
+                                <a data-toggle="modal" href="#" data-target="#myModal"> Search <i class="fa fa-search"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6 ftr-list ftr-TrendList-header">
+                        <h4>Trending Categories</h4>
+                        <div class="ftr-TrendList">
+                            <ul>
+                                @foreach (var item in tagCloudWords)
+                                {
+                                    //Outputs specific sizes dependant on how many occurances there are.
+                                    if (item.getTagCount() == 0)
+                                    {
+                                        double eventTypeId = item.getTagName();
+                                        string eventName = "";
+
+                                        foreach (var type in myEventTypes)
+                                        {
+                                            if (type.EVENT_TYPE_ID == eventTypeId)
+                                            {
+                                                eventName = type.TYPE_OF_EVENT;
+                                            }
+                                        }
+                                        <li class="ftr-TrendList-STR4"><a href="#">@eventName</a></li>
+                                    }
+
+                                    if (item.getTagCount() > 1 && item.getTagCount() <= 2)
+                                    {
+
+                                        double eventTypeId = item.getTagName();
+                                        string eventName = "";
+
+                                        foreach (var type in myEventTypes)
+                                        {
+                                            if (type.EVENT_TYPE_ID == eventTypeId)
+                                            {
+                                                eventName = type.TYPE_OF_EVENT;
+                                            }
+                                        }
+                                        <li class="ftr-TrendList-STR3"><a href="#">@eventName</a></li>
+                                    }
+
+
+                                    if (item.getTagCount() > 2 && item.getTagCount() <= 4)
+                                    {
+
+                                        double eventTypeId = item.getTagName();
+                                        string eventName = "";
+
+                                        foreach (var type in myEventTypes)
+                                        {
+                                            if (type.EVENT_TYPE_ID == eventTypeId)
+                                            {
+                                                eventName = type.TYPE_OF_EVENT;
+                                            }
+                                        }
+                                        <li class="ftr-TrendList-STR2"><a href="#">@eventName</a></li>
+                                    }
+
+                                    if (item.getTagCount() > 4)
+                                    {
+
+                                        double eventTypeId = item.getTagName();
+                                        string eventName = "";
+
+                                        foreach (var type in myEventTypes)
+                                        {
+                                            if (type.EVENT_TYPE_ID == eventTypeId)
+                                            {
+                                                eventName = type.TYPE_OF_EVENT;
+                                            }
+                                        }
+                                        <li class="ftr-TrendList-STR1"><a href="#">@eventName</a></li>
+                                    }
+
+                                }
+
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 pull-right socialButtons ftr-list">
+                        <h4> Find us online</h4>
+                        <ul class="social-network social-circle">
+                            <li><a href="#" class="icoRss" title="Rss"><i class="fa fa-rss"></i></a></li>
+                            <li><a href="https://www.facebook.com/PlymouthEventsAlpha/" target="_blank" class="icoFacebook" title="Facebook"><i class="fa fa-facebook"></i></a></li>
+                            <li><a href="https://twitter.com/EventsPlymouth" target="_blank" class="icoTwitter" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                            <li><a href="#" class="icoGoogle" title="Google +"><i class="fa fa-google-plus"></i></a></li>
+                            <li><a href="#" class="icoLinkedin" title="Linkedin"><i class="fa fa-linkedin"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--            bottom Navigation-->
+    <div class="container-fluid subfooter-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 sub-bottomFooter">
+                    <ul>
+                        <li><a href="/workforus.cshtml">Work for Us <i style="color: greenyellow;" class="fa fa-code"></i></a></li>
+                        <li>|</li>
+                        <li><a href="/sitemap.xml">Sitemap <i style="color: skyblue;" class="fa fa-map-marker"></i></a></li>
+                        <li>|</li>
+                        <li><a href="/legal.cshtml">Legal <i style="color: orange;" class="fa fa-gavel"></i></a></li>
+                        <li>|</li>
+                        <li><a href="/privacy.cshtml">Privacy Agreement <i style="color: #f4f4f4;" class="fa fa-users"></i></a></li>
+                        <li>|</li>
+                        <li><a href="/press.cshtml">Press Releases <i style="color: #FF4136;" class="fa fa-newspaper-o"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="container-fluid footer-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-7 col-xs-12">
+                    © 2016 Plymouth Events <span class="footer-slash">
+                </div>
+                <div class="col-lg-4 col-xs-12 pull-right footer-text-right">
+                    Developed by <a href="/index.cshtml">PRCS251E</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">What are you looking for?</h4>
+            </div>
+            <div class="modal-body">
+                <form method="get" action="~/category.cshtml">
+                    <div class="input-group stylish-input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search">
+                        <span class="input-group-addon">
+                            <button type="submit">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery Version 1.11.1 - jquery.com/ -->
+<script src="js/jquery.js"></script>
+
+<!-- Bootstrap Core JavaScript - getbootstrap.com/ -->
+<script src="js/bootstrap.min.js"></script>
+
+<!-- List.js - www.listjs.com/ -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.2.0/list.min.js"></script>
+
+<!-- List.js settings -->
+<script>
+    var options = {
+        valueNames: ['name', 'description']
+    };
+
+    var userList = new List('users', options);
+</script>
+
+
+<!--  owlcarousel www.owlcarousel.owlgraphic.com/ -->
+<script src="js/owl.carousel.min.js"></script>
+
+</body>
+
+</html>

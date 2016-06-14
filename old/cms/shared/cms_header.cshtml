@@ -1,0 +1,111 @@
+﻿@{
+    string url = Path.GetFileName(Request.Url.AbsolutePath);
+
+    string activeText = "class=active";
+
+    string currentPage = "";
+
+    switch (url)
+    {
+        case "index.cshtml":
+            currentPage = "index.cshtml";
+            break;
+
+        case "bookings.cshtml":
+            currentPage = "bookings.cshtml";
+            break;
+
+        case "profile.cshtml":
+            currentPage = "profile.cshtml";
+            break;
+
+        case "feedback.cshtml":
+            currentPage = "feedback.cshtml";
+            break;
+    }
+
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Plymouth Events the best event management system!</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!--        google font-->
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+
+    <!--        font awesome-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/cmsStyling.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top cmsTopNavigation" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/cms/index.cshtml">Plymouth Events</a>
+            </div>
+            <!-- Top Menu Items -->
+            <ul class="nav navbar-right top-nav">
+                <li>
+                    <a href="#">Profile</a>
+                </li>
+                <li>
+                    <a href="~/index.cshtml">Home</a>
+                </li>
+                <li>
+                    <a href="~/cms/logout.cshtml">Logout</a>
+                </li>
+                <li>
+                    <a href="#">Report an Issue</a>
+                </li>
+            </ul>
+            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav side-nav">
+                    <li class="categoryItem">
+                        <h5><i class="fa fa-user"></i> User Dashboard</h5>
+                        <hr>
+                    </li>
+                    <li @{if (currentPage == "index.cshtml") { <text> @activeText </text>  } }>
+                        <a href="~/cms/index.cshtml"><i class="fa fa-home"></i> Home</a>
+                    </li>
+                    <li @{if (currentPage == "bookings.cshtml") { <text> @activeText </text>  } }>
+                        <a href="~/cms/bookings.cshtml"><i class="fa fa-ticket"></i> My Bookings</a>
+                    </li>
+                    <li @{if (currentPage == "profile.cshtml") { <text> @activeText </text>  } }>
+                        <a href="~/profile.cshtml"><i class="fa fa-paint-brush"></i> Edit my Profile</a>
+                    </li>
+                    <li @{if (currentPage == "feedback.cshtml") { <text> @activeText </text>   } }>
+                        <a href="~/feedback.cshtml"><i class="fa fa-bell"></i> Feedback</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
